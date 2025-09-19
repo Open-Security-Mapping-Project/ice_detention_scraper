@@ -14,8 +14,9 @@ which will help with documenting the facilities appropriately. As these entries 
 your CSV results change almost immediately.
 
 You can also use `--load-existing` to leverage an existing
-scrape of the data from ICE.gov. This is stored in default_data.py and includes the official current addresses of facilities.
-(Note ICE has been renaming known "detention center" sites to "processing center", and so on.)
+scrape of the data from ICE.gov. This is stored in `default_data.py` and includes the official current addresses of facilities.
+
+> Note ICE has been renaming known "detention center" sites to "processing center", and so on.
 
 The initial scrape data also keeps a `base64` ecoded string containing the original HTML that was scraped from ice.gov about the
 facility. Keeping this initial data allows us to verify the resulting extracted data if we need to.
@@ -53,7 +54,7 @@ directory.
     uv run python main.py --load-existing --enrich --debug
 
     # With custom output file
-    uv run python main.py --load-existing --enrich --debug-wikipedia -o debug_facilities.csv
+    uv run python main.py --load-existing --enrich --debug-wikipedia -o debug_facilities
 ```
 
 ## Requirements
@@ -102,9 +103,8 @@ in hopes of finding similarly named pages but this is too aggressive, and it vee
 that have simpler names, like the county name instead of `county + detention center`). Use the debug mode to see what
 it is doing.
 * ICE scraping is not robustly tested. The image URL extraction needs some work. (should be able to get the detention center image URLs.)
-* OSM enrichment submits to OSM Nominatim API search with an extra comma between address number and street name.
 * The user-agent for running ice.gov scrape web requests calls itself `'User-Agent': 'ICE-Facilities-Research/1.0 (Educational Research Purpose)'`.
-You can change this in scraper.py and enricher.py.
+You can change this in `utils.py`.
 * It tells some pretty inaccurate percentages in the final summary - a lot of false positives, the Wikipedia debug percent
 seems wrong.
 * The remote query rate limiting is (I think) done in series but would go faster with parallel/async processing.

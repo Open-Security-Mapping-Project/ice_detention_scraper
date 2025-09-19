@@ -58,7 +58,7 @@ class ICEGovFacilityScraper(object):
         logger.debug("Found sheet at: %s", actual_link)
         self.sheet_url = actual_link
         logger.info("Downloading detention stats sheet from %s", self.sheet_url)
-        resp = session.get(self.sheet_url, timeout=120)
+        resp = session.get(self.sheet_url, timeout=120, stream=True)
         with open(self.filename, "wb") as f:
             for chunk in resp.iter_content(chunk_size=1024):
                 if chunk:

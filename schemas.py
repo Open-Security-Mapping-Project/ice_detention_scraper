@@ -1,5 +1,9 @@
 import datetime
 
+OSM_DELAY = 1.0  # 1 second between requests as per OSM policy
+WIKIDATA_DELAY = 0.5  # Be respectful to Wikidata
+WIKIPEDIA_DELAY = 0.5  # Be respectful to Wikipedia
+
 # default to Washington, D.C.?
 default_coords: dict = {
     "latitude": 38.89511000,
@@ -120,14 +124,21 @@ ice_facility_types = {
 }
 
 # enrichment response object
-resp_info_schema = {
+enrich_resp_schema = {
     "original_name": "",
     "cleaned_name": "",
     "search_query_steps": [],
     "url": "",
     "details": {},
     "method": "none",
+    "enrichment_type": "",
 }
+
+enrich_allowed_types = [
+    "wikipedia",
+    "wikidata",
+    "openstreetmap",
+]
 
 # enrichment print details
 enrichment_print_schema = {

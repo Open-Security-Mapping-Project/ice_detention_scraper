@@ -108,7 +108,11 @@ def print_summary(facilities_data: dict) -> None:
             elif "ERROR" in query:
                 errors += 1
 
-            logger.info("False positives detected and rejected: %s", false_positives)
-            logger.info("Search errors encountered: %s", errors)
+            if false_positives:
+                logger.info("False positives detected and rejected: %s", false_positives)
+            if errors:
+                logger.info("Search errors encountered: %s", errors)
+            if false_positives or errors:
+                logger.info("Details: %s", facility.get("wikipedia_search_query", ""))
 
     logger.info("\n=== ICE Detention Facilities Scraper: Run completed ===")

@@ -13,11 +13,12 @@ _retry_strategy = urllib3.Retry(
     total=4,
     backoff_factor=1,
 )
+default_headers = {"User-Agent": "ICE-Facilities-Research/1.0 (Educational Research Purpose)"}
 _adapter = HTTPAdapter(max_retries=_retry_strategy)
 session = requests.Session()
 session.mount("https://", _adapter)
 session.mount("http://", _adapter)
-session.headers.update({"User-Agent": "ICE-Facilities-Research/1.0 (Educational Research Purpose)"})
+session.headers.update(default_headers)
 
 default_timestamp = "1970-01-01T00:00:00-+0000"
 timestamp_format = "%Y-%m-%dT%H:%M:%S-%z"
