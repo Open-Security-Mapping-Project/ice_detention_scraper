@@ -58,6 +58,9 @@ facility_sheet_header = [
 flatdata_filtered_keys = [
     "_repaired_record",
     "address_str",
+    "field_office.raw_scrape",
+    "field_office.address_str",
+    "field_office.source_urls",
     "osm.search_query",
     "raw_scrape",
     "source_urls",
@@ -79,7 +82,7 @@ def _flatdict(d: dict, parent_key: str = "", sep: str = ".") -> dict:
 
 
 def convert_to_dataframe(d: dict) -> polars.DataFrame:
-    """facilities internal dict to dataframe"""
+    """internal dict to dataframe"""
     flatdata = [_flatdict(f) for f in d.values()]
     fieldnames = [k for k in flatdata[0].keys() if k not in flatdata_filtered_keys]
     # https://docs.pola.rs/api/python/stable/reference/api/polars.from_dicts.html
