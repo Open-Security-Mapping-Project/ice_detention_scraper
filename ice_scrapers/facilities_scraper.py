@@ -50,6 +50,10 @@ def scrape_facilities(facilities_data: dict) -> dict:
             if cleaned:
                 addr["locality"] = locality
                 facility["_repaired_record"] = True
+            name, cleaned = repair_locality(facility["name"], addr["locality"])
+            if cleaned:
+                facility["name"] = name
+                facility["_repaired_record"] = True
             full_address = ",".join([street, locality, addr["administrative_area"], zcode]).upper()
             if not facility["address_str"]:
                 facility["address_str"] = full_address

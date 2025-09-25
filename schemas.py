@@ -94,6 +94,7 @@ facility_schema: dict = {
         "total": 0,
     },
     "source_urls": [],
+    "vera_id": "",
     "wikipedia": {
         "page_url": "",
         "search_query": "",
