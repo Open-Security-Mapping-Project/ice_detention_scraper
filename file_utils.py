@@ -23,12 +23,14 @@ def export_to_file(
         match file_type:
             case "xlsx":
                 with xlsxwriter.Workbook(full_name, {"remove_timezone": True}) as wb:
-                    writer.write_excel(workbook=wb, include_header=True, autofit=True)
+                    _ = writer.write_excel(workbook=wb, include_header=True, autofit=True)
             case "csv":
                 with open(full_name, "w", newline="", encoding="utf-8") as f_out:
                     writer.write_csv(file=f_out, include_header=True)
             case "parquet":
                 writer.write_parquet(full_name, use_pyarrow=True)
+            case _:
+                logger.warning("Invalid dataframe output type %s", file_type)
     elif file_type == "json":
         with open(full_name, "w", encoding="utf-8") as f_out:
             json.dump(facilities_data, f_out, indent=2, sort_keys=True, default=str)
@@ -103,7 +105,7 @@ def print_summary(facilities_data: dict) -> None:
         false_positives = 0
         errors = 0
         for facility in facilities_data["facilities"].values():
-            query = facility.get("wikipedia", {}).get("search_query", "")
+            query: str = facility.get("wikipedia", {}).get("search_query", "")
             if "REJECTED" in query:
                 false_positives += 1
             elif "ERROR" in query:

@@ -36,6 +36,9 @@ def _enrich_facility(facility_data: tuple) -> tuple:
     """enrich a single facility"""
     facility_id, facility = facility_data
     facility_name = facility["name"]
+    if len(facility["source_urls"]) == 1 and "vera-institute/ice-detention-trends" in facility["source_urls"][0]:
+        logger.debug("  Skipping enrichment of facility with only vera.org data: %s", facility["name"])
+        return facility_id, facility
     logger.info("Enriching facility %s...", facility_name)
     enriched_facility = copy.deepcopy(facility)
 

@@ -1,21 +1,21 @@
 from bs4 import BeautifulSoup
 import copy
 import datetime
+from ice_scrapers import (
+    ice_facility_types,
+    ice_inspection_types,
+    repair_locality,
+    repair_name,
+    repair_street,
+    repair_zip,
+    special_facilities,
+)
 import os
 import polars
 import re
 from schemas import (
     facility_schema,
     field_office_schema,
-)
-from ice_scrapers import (
-    facility_sheet_header,
-    ice_facility_types,
-    ice_inspection_types,
-    repair_locality,
-    repair_street,
-    repair_zip,
-    special_facilities,
 )
 from typing import Tuple
 from utils import (
@@ -27,8 +27,40 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 base_xlsx_url = "https://www.ice.gov/detain/detention-management"
 filename = f"{SCRIPT_DIR}{os.sep}detentionstats.xlsx"
 
+# extracted ADP sheet header list 2025-09-07
+facility_sheet_header = [
+    "Name",
+    "Address",
+    "City",
+    "State",
+    "Zip",
+    "AOR",
+    "Type Detailed",
+    "Male/Female",
+    "FY25 ALOS",
+    "Level A",
+    "Level B",
+    "Level C",
+    "Level D",
+    "Male Crim",
+    "Male Non-Crim",
+    "Female Crim",
+    "Female Non-Crim",
+    "ICE Threat Level 1",
+    "ICE Threat Level 2",
+    "ICE Threat Level 3",
+    "No ICE Threat Level",
+    "Mandatory",
+    "Guaranteed Minimum",
+    "Last Inspection Type",
+    "Last Inspection End Date",
+    "Pending FY25 Inspection",
+    "Last Inspection Standard",
+    "Last Final Rating",
+]
 
-def _download_sheet(keep_sheet: bool = True) -> Tuple[polars.DataFrame, str]:
+
+def _download_sheet(keep_sheet: bool = True, force_download: bool = True) -> Tuple[polars.DataFrame, str]:
     """Download the detention stats sheet from ice.gov"""
     resp = session.get(base_xlsx_url, timeout=120)
     resp.raise_for_status()
@@ -50,19 +82,20 @@ def _download_sheet(keep_sheet: bool = True) -> Tuple[polars.DataFrame, str]:
             actual_link = link["href"]
             # this seems like tracking into the future...
             cur_year = year
-
     logger.debug("Found sheet at: %s", actual_link)
-    logger.info("Downloading detention stats sheet from %s", actual_link)
-    resp = session.get(actual_link, timeout=120, stream=True)
-    size = len(resp.content)
-    with open(filename, "wb") as f:
-        for chunk in resp.iter_content(chunk_size=1024):
-            if chunk:
-                f.write(chunk)
-    logger.debug("Wrote %s byte sheet to %s", size, filename)
+    if force_download or not os.path.exists(filename):
+        logger.info("Downloading detention stats sheet from %s", actual_link)
+        resp = session.get(actual_link, timeout=120, stream=True)
+        size = len(resp.content)
+        with open(filename, "wb") as f:
+            for chunk in resp.iter_content(chunk_size=1024):
+                if chunk:
+                    f.write(chunk)
+        logger.debug("Wrote %s byte sheet to %s", size, filename)
     df = polars.read_excel(
         drop_empty_rows=True,
         has_header=False,
+        raise_if_empty=True,
         # because we're manually defining the header...
         read_options={"skip_rows": 7, "column_names": facility_sheet_header},
         sheet_name=f"Facilities FY{cur_year}",
@@ -73,8 +106,9 @@ def _download_sheet(keep_sheet: bool = True) -> Tuple[polars.DataFrame, str]:
     return df, actual_link
 
 
-def load_sheet(keep_sheet: bool = True) -> dict:
-    df, sheet_url = _download_sheet(keep_sheet)
+def load_sheet(keep_sheet: bool = True, force_download: bool = True) -> dict:
+    logger.info("Collecting initial facility data from %s", base_xlsx_url)
+    df, sheet_url = _download_sheet(keep_sheet, force_download)
     """Convert the detentionstats sheet data into something we can update our facilities with"""
     results: dict = {}
     # occassionally a phone number shows up in weird places in the spreadsheet.
@@ -95,11 +129,14 @@ def load_sheet(keep_sheet: bool = True) -> dict:
         locality, cleaned = repair_locality(row["City"], row["State"])
         if cleaned:
             details["_repaired_record"] = True
+        name, cleaned = repair_name(row["Name"], row["City"])
+        if cleaned:
+            details["_repaired_record"] = True
         details["address"]["administrative_area"] = row["State"]
         details["address"]["locality"] = locality
         details["address"]["postal_code"] = zcode
         details["address"]["street"] = street
-        details["name"] = row["Name"]
+        details["name"] = name
         details = special_facilities(details)
         full_address = ",".join(
             [
@@ -157,9 +194,9 @@ def load_sheet(keep_sheet: bool = True) -> dict:
             "last_rating": row["Last Final Rating"],
         }
         details["source_urls"].append(sheet_url)
-        # details["field_office"] = self.field_offices["field_offices"][area_of_responsibility[row["AOR"]]]
         details["field_office"] = copy.deepcopy(field_office_schema)
         details["field_office"]["id"] = row["AOR"]
         details["address_str"] = full_address
         results[full_address] = details
+    logger.info("  Loaded %s facilties", len(results.keys()))
     return results
