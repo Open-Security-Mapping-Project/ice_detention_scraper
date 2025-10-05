@@ -3,7 +3,7 @@ import copy
 """
 Handle manually discovered/managed facilities
 """
-custom_facilities = {
+custom_facilities: dict = {
     "2309 North Highway 83,McCook,NE,69001": {
         "_repaired_record": False,
         "address": {
