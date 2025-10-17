@@ -9,9 +9,9 @@ from ice_scrapers import (
 from schemas import facilities_schema
 
 
-def facilities_scrape_wrapper() -> dict:
+def facilities_scrape_wrapper(keep_sheet: bool = True, force_download: bool = True) -> dict:
     facilities_data = copy.deepcopy(facilities_schema)
-    facilities = load_sheet()
+    facilities = load_sheet(keep_sheet, force_download)
     facilities_data["facilities"] = copy.deepcopy(facilities)
     facilities_data = scrape_facilities(facilities_data)
     field_offices = scrape_field_offices()

@@ -43,13 +43,23 @@ def _enrich_facility(facility_data: tuple) -> tuple:
     wd_res = wikidata.Wikidata(facility_name=facility_name).search()
     osm = openstreetmap.OpenStreetMap(facility_name=facility_name, address=facility.get("address", {}))
     osm_res = osm.search()
-    enriched_facility["wikipedia"]["page_url"] = wiki_res.get("url", "")
+    url = wiki_res.get("url", None)
+    if url:
+        enriched_facility["wikipedia"]["page_url"] = url
     enriched_facility["wikipedia"]["search_query"] = wiki_res.get("search_query_steps", "")
-    enriched_facility["wikidata"]["page_url"] = wd_res.get("url", "")
+    url = wd_res.get("url", None)
+    if url:
+        enriched_facility["wikidata"]["page_url"] = url
     enriched_facility["wikidata"]["search_query"] = wd_res.get("search_query_steps", "")
-    enriched_facility["osm"]["latitude"] = osm_res.get("details", {}).get("latitude", osm.default_coords["latitude"])
-    enriched_facility["osm"]["longitude"] = osm_res.get("details", {}).get("longitude", osm.default_coords["longitude"])
-    enriched_facility["osm"]["url"] = osm_res.get("url", "")
+    lat = osm_res.get("details", {}).get("latitude", None)
+    long = osm_res.get("details", {}).get("longitude", None)
+    if lat:
+        enriched_facility["osm"]["latitude"] = lat
+    if long:
+        enriched_facility["osm"]["longitude"] = lat
+    url = osm_res.get("url", None)
+    if url:
+        enriched_facility["osm"]["url"] = url
     enriched_facility["osm"]["search_query"] = osm_res.get("search_query_steps", "")
 
     logger.debug(enriched_facility)

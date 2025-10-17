@@ -4,43 +4,23 @@ types exist before attempting to import functions that
 may call them
 """
 
-# extracted ADP sheet header list 2025-09-07
-facility_sheet_header = [
-    "Name",
-    "Address",
-    "City",
-    "State",
-    "Zip",
-    "AOR",
-    "Type Detailed",
-    "Male/Female",
-    "FY25 ALOS",
-    "Level A",
-    "Level B",
-    "Level C",
-    "Level D",
-    "Male Crim",
-    "Male Non-Crim",
-    "Female Crim",
-    "Female Non-Crim",
-    "ICE Threat Level 1",
-    "ICE Threat Level 2",
-    "ICE Threat Level 3",
-    "No ICE Threat Level",
-    "Mandatory",
-    "Guaranteed Minimum",
-    "Last Inspection Type",
-    "Last Inspection End Date",
-    "Pending FY25 Inspection",
-    "Last Inspection Standard",
-    "Last Final Rating",
-]
-
 ice_inspection_types = {
     # found in https://www.ice.gov/foia/odo-facility-inspections
     "ODO": "Office of Detention Oversight",
     # found in https://ia803100.us.archive.org/16/items/6213032-ORSA-MOU-ICE/6213032-ORSA-MOU-ICE_text.pdf
     "ORSA": "Operational Review Self-Assessment",
+}
+
+# extracted from https://vera-institute.files.svdcdn.com/production/downloads/dashboard_appendix.pdf 2025-09-23
+ice_facility_group_mapping = {
+    "Non-Dedicated": ["IGSA"],
+    "Dedicated": ["DIGSA", "CDF", "SPC"],
+    "Federal": ["BOF", "USMSIGA", "USMS IGA", "USMS CDF", "DOD", "MOC"],
+    "Hold/Staging": ["Hold", "Staging"],
+    "Family/Youth": ["Family", "Juvenile", "FAMILY"],
+    "Medical": ["Hospital"],
+    "Hotel": ["Hotel"],
+    "Other/Unknown": ["Other", "Unknown", "Pending"],
 }
 
 # extracted from https://www.ice.gov/doclib/detention/FY25_detentionStats08292025.xlsx 2025-09-07
@@ -49,21 +29,49 @@ ice_facility_types = {
         "expanded_name": "Federal Bureau of Prisons",
         "description": "A facility operated by the Federal Bureau of Prisons",
     },
+    "CDF": {
+        "expanded_name": "Contract Detention Facility",
+        "description": "Name derived from listing at https://www.vera.org/ice-detention-trends",
+    },
     "DIGSA": {
         "expanded_name": "Dedicated Intergovernmental Service Agreement",
         "description": "A publicly-owned facility operated by state/local government(s), or private contractors, in which ICE contracts to use all bed space via a Dedicated Intergovernmental Service Agreement; or facilities used by ICE pursuant to Intergovernmental Service Agreements, which house only ICE detainees – typically these are operated by private contractors pursuant to their agreements with local governments.",
     },
     "DOD": {
         "expanded_name": "Department of Defense",
-        "description": "Military facility",
+        "description": "Department of Defence facilities - Often Army bases",
+    },
+    "FAMILY": {
+        "expanded_name": "Family",
+        "description": "A facility in which families are able to remain together while awaiting their proceedings",
+    },
+    "Family": {
+        "expanded_name": "Family",
+        "description": "A facility in which families are able to remain together while awaiting their proceedings",
+    },
+    "Hospital": {
+        "expanded_name": "Hospital",
+        "description": "A medical facility",
     },
     "IGSA": {
         "expanded_name": "Intergovernmental Service Agreement",
         "description": "A publicly-owned facility operated by state/local government(s), or private contractors, in which ICE contracts for bed space via an Intergovernmental Service Agreement; or local jails used by ICE pursuant to Intergovernmental Service Agreements, which house both ICE and non-ICE detainees, typically county prisoners awaiting trial or serving short sentences, but sometimes also USMS prisoners.",
     },
+    "Juvenile": {
+        "expanded_name": "Juvenile",
+        "description": "An IGSA facility capable of housing juveniles (separate from adults) for a temporary period of time",
+    },
+    "Other": {
+        "expanded_name": "Other",
+        "description": "Facilities including but not limited to transportation-related facilities, hotels, and/or other facilities",
+    },
     "SPC": {
         "expanded_name": "Service Processing Center",
         "description": "A facility owned by the government and staffed by a combination of federal and contract employees.",
+    },
+    "Unknown": {
+        "expanded_name": "Unknown",
+        "description": "A facility whose type could not be identified",
     },
     "USMS": {
         "expanded_name": "United States Marshals Service",
@@ -80,10 +88,6 @@ ice_facility_types = {
     },
     "USMS CDF": {
         "expanded_name": "United States Marshals Service Contract Detention Facility",
-        "description": "Name derived from listing at https://www.vera.org/ice-detention-trends",
-    },
-    "CDF": {
-        "expanded_name": "Contract Detention Facility",
         "description": "Name derived from listing at https://www.vera.org/ice-detention-trends",
     },
     "Staging": {
@@ -131,6 +135,7 @@ from .utils import (  # noqa: E402
     repair_locality,  # noqa: F401
     repair_street,  # noqa: F401
     repair_zip,  # noqa: F401
+    repair_name,  # noqa: F401
     special_facilities,  # noqa: F401
     update_facility,  # noqa: F401
 )

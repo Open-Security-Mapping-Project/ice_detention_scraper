@@ -93,6 +93,16 @@ def main() -> None:
         help="Add another column on export for OpenStreetMap debugging details and redirects",
     )
 
+    parser.add_argument(
+        "--skip-downloads",
+        action="store_true",
+        help="Skip downloading sheet data",
+    )
+    parser.add_argument(
+        "--delete-sheets",
+        action="store_true",
+        help="Remove any sheets we downloaded",
+    )
     args = parser.parse_args()
     if args.debug:
         logger.setLevel(logging.DEBUG)
@@ -113,7 +123,10 @@ def main() -> None:
         exit(1)
 
     if args.scrape:
-        facilities_data = facilities_scrape_wrapper()
+        facilities_data = facilities_scrape_wrapper(
+            keep_sheet=not args.delete_sheets,
+            force_download=not args.skip_downloads,
+        )
     elif args.load_existing:
         facilities_data = copy.deepcopy(default_data.facilities_data)
         logger.info(

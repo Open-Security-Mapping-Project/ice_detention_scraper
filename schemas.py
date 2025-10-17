@@ -106,7 +106,7 @@ facility_schema: dict = {
 
 
 # enrichment response object
-enrich_resp_schema = {
+enrich_resp_schema: dict = {
     "cleaned_name": "",
     "details": {},
     "enrichment_type": "",
@@ -117,10 +117,10 @@ enrich_resp_schema = {
 }
 
 # enrichment print details
-enrichment_print_schema = {
+enrichment_print_schema: dict = {
     "osm_found": 0,
     "wiki_found": 0,
     "wikidata_found": 0,
 }
 
-supported_output_types = ["csv", "json", "parquet", "xlsx"]
+supported_output_types: list = ["csv", "json", "parquet", "xlsx"]

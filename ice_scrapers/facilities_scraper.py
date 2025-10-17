@@ -7,6 +7,7 @@ from ice_scrapers import (
     repair_locality,
     repair_street,
     repair_zip,
+    repair_name,
     special_facilities,
     update_facility,
 )
@@ -29,6 +30,7 @@ def scrape_facilities(facilities_data: dict) -> dict:
     facilities_data["scraped_date"] = datetime.datetime.now(datetime.UTC)
     urls = get_ice_scrape_pages(base_scrape_url)
 
+    scraped_count = 0
     for page_num, url in enumerate(urls):
         logger.info("Scraping page %s/%s...", page_num + 1, len(urls))
         try:
@@ -37,6 +39,7 @@ def scrape_facilities(facilities_data: dict) -> dict:
             logger.error("Error scraping page %s: %s", page_num + 1, e)
         logger.debug("Found %s facilities on page %s", len(facilities), page_num + 1)
         time.sleep(1)  # Be respectful to the server
+        scraped_count += len(facilities)
         for facility in facilities:
             facility = special_facilities(facility)
             addr = facility["address"]
@@ -51,6 +54,10 @@ def scrape_facilities(facilities_data: dict) -> dict:
             locality, cleaned = repair_locality(addr["locality"], addr["administrative_area"])
             if cleaned:
                 addr["locality"] = locality
+                facility["_repaired_record"] = True
+            name, cleaned = repair_name(facility["name"], addr["locality"])
+            if cleaned:
+                facility["name"] = name
                 facility["_repaired_record"] = True
             full_address = ",".join([street, locality, addr["administrative_area"], zcode]).upper()
             if not facility["address_str"]:
@@ -73,12 +80,12 @@ def scrape_facilities(facilities_data: dict) -> dict:
                 facilities_data["facilities"][facility["name"]] = facility  # type: ignore [index]
 
     facilities_data["scrape_runtime"] = time.time() - start_time
-    logger.info("Total facilities scraped: %s", len(list(facilities_data["facilities"].keys())))  # type: ignore [attr-defined]
+    logger.info("Total facilities scraped: %s", scraped_count)
     logger.info(" Completed in %s seconds", facilities_data["scrape_runtime"])
     return facilities_data
 
 
-def _scrape_updated(url: str):
+def _scrape_updated(url: str) -> datetime.datetime:
     """
     Scrape url to get "last updated" time
     Is specifically oriented around ice.gov facility pages
@@ -92,7 +99,7 @@ def _scrape_updated(url: str):
         response.raise_for_status()
     except Exception as e:
         logger.error("  Error parsing %s: %s", url, e)
-        return []
+        return datetime.datetime.strptime(default_timestamp, timestamp_format)
     soup = BeautifulSoup(response.content, "html.parser")
     times = soup.findAll("time")
     if not times:
@@ -176,7 +183,6 @@ def _scrape_page(page_url: str) -> list:
             facilities.append(facility_data)
 
     logger.info("  Extracted %s facilities from page", len(facilities))
-
     return facilities
 
 
