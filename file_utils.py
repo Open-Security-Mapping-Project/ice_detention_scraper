@@ -1,9 +1,11 @@
 import copy
 import json
+import os
 from schemas import enrichment_print_schema
 from utils import (
     convert_to_dataframe,
     logger,
+    output_folder,
 )
 import xlsxwriter  # type: ignore [import-untyped]
 
@@ -16,8 +18,9 @@ def export_to_file(
     if not facilities_data or not facilities_data.get("facilities", []):
         logger.warning("No data to export!")
         return ""
-
-    full_name = f"{filename}.{file_type}"
+    # make sure the folder we're dropping files into exists
+    os.makedirs(output_folder, exist_ok=True)
+    full_name = f"{output_folder}/{filename}.{file_type}"
     if file_type in ["csv", "xlsx", "parquet"]:
         writer = convert_to_dataframe(facilities_data["facilities"])
         match file_type:
@@ -36,10 +39,9 @@ def export_to_file(
             json.dump(facilities_data, f_out, indent=2, sort_keys=True, default=str)
 
     logger.info(
-        "%s file '%s.%s' created successfully with %s facilities.",
+        "%s file '%s' created successfully with %s facilities.",
         file_type,
-        filename,
-        file_type,
+        full_name,
         len(facilities_data["facilities"]),
     )
     return filename

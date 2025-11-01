@@ -55,7 +55,6 @@ def main() -> None:
     )
     parser.add_argument(
         "--file-type",
-        default="csv",
         choices=supported_output_types,
         help="type of file to export",
     )
@@ -121,12 +120,13 @@ def main() -> None:
     # todo. temporary notice for debug arguments.
     if args.debug_wikipedia or args.debug_wikidata or args.debug_osm:
         logger.warning(
-            "Warning: --debug-wikipedia, --debug-wikidata and --debug-osm are currently not implemented as command line options."
+            "  Warning: --debug-wikipedia, --debug-wikidata and --debug-osm are currently not implemented as command line options."
         )
     if args.scrape and args.load_existing:
         logger.error("Can't scrape and load existing data!")
         exit(1)
 
+    facilities_data = {}
     if args.scrape:
         facilities_data = facilities_scrape_wrapper(
             keep_sheet=not args.delete_sheets,
@@ -139,10 +139,16 @@ def main() -> None:
             "Loaded %s existing facilities from local data. (Not scraping)",
             len(facilities_data["facilities"].keys()),  # type: ignore [attr-defined]
         )
+    elif args.enrich:
+        facilities_data = copy.deepcopy(default_data.facilities_data)
+        logger.warning(
+            "  Did not supply --scrape or --load-existing. Proceeding with default data set (%s facilities)",
+            len(facilities_data["facilities"].keys()),  # type: ignore [attr-defined]
+        )
 
     if args.enrich:
         if not facilities_data:
-            logger.warning("No facility data available for enrichment.")
+            logger.warning("  No facility data available for enrichment.")
             return
         facilities_data = enrich_facility_data(facilities_data, args.enrich_workers)
 
@@ -150,10 +156,14 @@ def main() -> None:
         output_filename = args.output_file_name
         if args.enrich and not output_filename.endswith("_enriched"):
             output_filename = f"{output_filename}_enriched"
-        export_to_file(facilities_data, output_filename, args.file_type)
+        if not args.file_type:
+            for ftype in supported_output_types:
+                export_to_file(facilities_data, output_filename, ftype)
+        else:
+            export_to_file(facilities_data, output_filename, args.file_type)
         print_summary(facilities_data)
     else:
-        logger.warning("No data to export!")
+        logger.warning("  No data to export!")
 
 
 if __name__ == "__main__":

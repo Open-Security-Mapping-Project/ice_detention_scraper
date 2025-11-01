@@ -1,0 +1,60 @@
+#   Refer for explanation to following link:
+#   https://lefthook.dev/configuration/
+pre-commit:
+  parallel: true
+  jobs:
+    - name: shell script validation
+      run: shellcheck --shell=bash -x {staged_files}
+      glob:
+        - "*.sh"
+        - "*.zsh"
+        - "*.bash"
+
+    - name: markdown linting
+      run: markdownlint-cli2 --fix --config .markdownlint.json {staged_files}
+      glob:
+        - "*.md"
+      stage_fixed: true
+
+    - name: yaml linting
+      run: yamllint -c .yamllint-config.yaml .
+      glob: "*.y*ml"
+
+    - name: Github Action linting
+      run: actionlint
+      glob:
+        - ".github/workflows/*.y*ml"
+
+    - name: Ruff Formatting
+      run: uv run ruff format -q .
+      glob:
+        - "*.py"
+      stage_fixed: true
+
+    - name: Ruff Syntax checking
+      run: uv run ruff check --fix -q
+      glob:
+        - "*.py"
+      stage_fixed: true
+
+    - name: MyPy type validation
+      run: uv run mypy .
+      glob:
+        - "*.py"
+
+    - name: json validation
+      run: tools/check-json.sh {staged_files}
+      glob:
+        - "*.json"
+
+    - name: check for merge conflicts
+      run: tools/check-merge-conflicts.sh {staged_files}
+
+    - name: check for bad file details
+      run: tools/check-file-details.sh {staged_files}
+      stage_fixed: true
+
+output:
+  - success
+  - failure
+  - summary

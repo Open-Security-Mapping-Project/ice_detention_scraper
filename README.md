@@ -78,7 +78,7 @@ Examples of the full setup for some OSes are below:
     eval "$(mise activate bash)"
     pip install --upgrade pip wheel uv
     uv sync
-    uv run pre-commit install
+    lefthook install pre-commit -f
 ```
 
 Another command for installing mise in your session can also work (in bash):
@@ -98,7 +98,7 @@ Another command for installing mise in your session can also work (in bash):
     eval "$(mise activate zsh)"
     pip install --upgrade pip wheel uv
     uv sync
-    uv run pre-commit install
+    lefthook install pre-commit -f
 ```
 
 ## Todo / Known Issues
@@ -115,7 +115,9 @@ seems wrong.
 
 ## Contributing & Code Standards
 
-We have a [.pre-commit-config.yaml](.pre-commit-config.yaml) file which enforces some linting / formatting rules.
+We have a [.lefthook.yml](.lefthook.yml) file which enforces some linting / formatting rules.
+
+We also rely on [ruff](https://docs.astral.sh/ruff/) and [mypy](https://www.mypy-lang.org/) for ensuring python coding standards.
 
 Pull requests and reviews are welcome on the main repo. For checking type safety use [mypy](https://github.com/python/mypy):
 

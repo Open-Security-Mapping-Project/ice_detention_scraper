@@ -1,5 +1,11 @@
 __pycache__/
 *.csv
+**/.csv
 *.json
+**/*.json
 *.xlsx
+**/.xlsx
 *.xlsx#
+**/.xlsx#
+*.parquet
+**/.parquet

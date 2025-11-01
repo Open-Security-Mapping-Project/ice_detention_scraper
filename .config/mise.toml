@@ -1,2 +1,9 @@
 [tools]
 python = "3.13.3"
+node = "latest"
+lefthook = "latest"
+yamllint = "latest"
+actionlint = "latest"
+shellcheck = "latest"
+markdownlint-cli2 = "latest"
+jq = "latest"

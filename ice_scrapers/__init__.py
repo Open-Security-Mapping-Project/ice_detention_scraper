@@ -115,7 +115,7 @@ area_of_responsibility = {
     "HLG": "Harlingen Field Office",
     "HOU": "Houston Field Office",
     "LOS": "Los Angeles Field Office",
-    "MIA": "Miami Field Office",
+    "MIA": "Miramar Sub Office",
     "NEW": "Newark Field Office",
     "NOL": "New Orleans Field Office",
     "NYC": "New York City Field Office",

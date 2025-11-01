@@ -1,10 +1,12 @@
 # For general helpers, regexes, or shared logic (e.g. phone/address parsing functions).
 import logging
+import os
 import polars
 import requests
 from requests.adapters import HTTPAdapter
 import urllib3
 
+SCRIPTDIR = os.path.dirname(os.path.realpath(__file__))
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
@@ -20,6 +22,7 @@ session.mount("https://", _adapter)
 session.mount("http://", _adapter)
 session.headers.update(default_headers)
 
+output_folder = f"{SCRIPTDIR}/output/"
 default_timestamp = "1970-01-01T00:00:00-+0000"
 timestamp_format = "%Y-%m-%dT%H:%M:%S-%z"
 
