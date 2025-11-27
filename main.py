@@ -129,7 +129,7 @@ def main() -> None:
         logger.error("Can't scrape and load existing data!")
         exit(1)
 
-    facilities_data = {}
+    facilities_data: dict = {}
     if args.scrape:
         facilities_data, agencies = facilities_scrape_wrapper(
             keep_sheet=not args.delete_sheets,
