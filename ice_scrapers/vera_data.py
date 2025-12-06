@@ -5,15 +5,15 @@ import polars
 from schemas import facility_schema
 from utils import (
     logger,
-    session,
+    output_folder,
+    req_get,
 )
 
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 # Github can aggressively rate-limit requests, so this may fail in surprising ways!
 base_url = (
     "https://raw.githubusercontent.com/vera-institute/ice-detention-trends/refs/heads/main/metadata/facilities.csv"
 )
-filename = f"{SCRIPT_DIR}{os.sep}vera_facilities.csv"
+filename = f"{output_folder}{os.sep}vera_facilities.csv"
 
 
 def _vera_name_fixes(name: str, city: str) -> tuple[str, bool]:
@@ -216,8 +216,7 @@ def _vera_city_fixes(city: str, state: str) -> tuple[str, bool]:
 def collect_vera_facility_data(facilities_data: dict, keep_sheet: bool = True, force_download: bool = True) -> dict:
     logger.info("Collecting and extracting data from vera.org facility data...")
     if force_download or not os.path.exists(filename):
-        res = session.get(base_url, timeout=120, stream=True)
-        res.raise_for_status()
+        res = req_get(base_url, timeout=120, stream=True)
         size = len(res.content)
         with open(filename, "wb") as f:
             for chunk in res.iter_content(chunk_size=1024):

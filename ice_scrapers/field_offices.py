@@ -14,7 +14,7 @@ from schemas import (
 import time
 from utils import (
     logger,
-    session,
+    req_get,
 )
 from .utils import get_ice_scrape_pages
 
@@ -45,8 +45,7 @@ def _scrape_page(page_url: str) -> list[dict]:
     """Scrape a single page of facilities using BeautifulSoup"""
     logger.debug("  Fetching: %s", page_url)
     try:
-        response = session.get(page_url, timeout=30)
-        response.raise_for_status()
+        response = req_get(page_url, timeout=30)
     except Exception as e:
         logger.error("  Error parsing %s: %s", page_url, e)
         return []

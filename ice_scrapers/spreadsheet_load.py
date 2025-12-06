@@ -5,14 +5,6 @@ from ice_scrapers import (
     ice_facility_types,
     ice_inspection_types,
 )
-from .utils import (
-    download_file,
-    repair_locality,
-    repair_name,
-    repair_street,
-    repair_zip,
-    special_facilities,
-)
 import os
 import polars
 import re
@@ -22,13 +14,21 @@ from schemas import (
 )
 from utils import (
     logger,
-    session,
+    output_folder,
+    req_get,
+)
+from .utils import (
+    download_file,
+    repair_locality,
+    repair_name,
+    repair_street,
+    repair_zip,
+    special_facilities,
 )
 
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 base_xlsx_url = "https://www.ice.gov/detain/detention-management"
-filename = f"{SCRIPT_DIR}{os.sep}detentionstats.xlsx"
-# extracted ADP sheet header list 2025-09-07
+filename = f"{output_folder}{os.sep}detentionstats.xlsx"
+# extracted ADP sheet header list 2025-11-07
 # These headers periodically change. (eg the FY headers.)
 facility_sheet_header = [
     "Name",
@@ -64,8 +64,7 @@ facility_sheet_header = [
 
 def _download_sheet(keep_sheet: bool = True, force_download: bool = True) -> tuple[polars.DataFrame, str]:
     """Download the detention stats sheet from ice.gov"""
-    resp = session.get(base_xlsx_url, timeout=120)
-    resp.raise_for_status()
+    resp = req_get(base_xlsx_url, timeout=120)
     soup = BeautifulSoup(resp.content, "html.parser")
     links = soup.findAll("a", href=re.compile("^https://www.ice.gov/doclib.*xlsx"))
     if not links:

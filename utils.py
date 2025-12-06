@@ -4,6 +4,7 @@ import os
 import polars
 import requests
 from requests.adapters import HTTPAdapter
+import time
 import urllib3
 
 SCRIPTDIR = os.path.dirname(os.path.realpath(__file__))
@@ -22,7 +23,10 @@ session.mount("https://", _adapter)
 session.mount("http://", _adapter)
 session.headers.update(default_headers)
 
-output_folder = f"{SCRIPTDIR}/output/"
+output_folder = f"{SCRIPTDIR}{os.sep}output{os.sep}"
+# and make sure our output folder exists
+os.makedirs(output_folder, exist_ok=True)
+
 default_timestamp = "1970-01-01T00:00:00-+0000"
 timestamp_format = "%Y-%m-%dT%H:%M:%S-%z"
 
@@ -37,6 +41,36 @@ flatdata_filtered_keys = [
     "wikipedia.search_query",
     "wikidata.search_query",
 ]
+
+
+def req_get(url: str, **kwargs) -> requests.Response:
+    """requests response wrapper to ensure we honor waits"""
+    headers = kwargs.get("headers", {})
+    # ensure we get all headers configured correctly
+    # but manually applied headers win the argument
+    for k, v in default_headers.items():
+        if k in headers.keys():
+            continue
+        headers[k] = v
+
+    response = session.get(
+        url,
+        allow_redirects=True,
+        timeout=kwargs.get("timeout", 10),
+        params=kwargs.get("params", {}),
+        stream=kwargs.get("stream", False),
+        headers=headers,
+    )
+    if not kwargs.get("raise_err", False):
+        response.raise_for_status()
+    else:
+        if response.status_code > 399:
+            if response.status_code < 500:
+                logger.error("Client-side error in request to %s :: %s", url, response.text)
+            else:
+                logger.error("Server-side error in request to %s :: %s", url, response.text)
+    time.sleep(kwargs.get("wait_time", 1))
+    return response
 
 
 def _flatdict(d: dict, parent_key: str = "", sep: str = ".") -> dict:
@@ -57,6 +91,6 @@ def convert_to_dataframe(d: dict) -> polars.DataFrame:
     fieldnames = [k for k in flatdata[0].keys() if k not in flatdata_filtered_keys]
     # https://docs.pola.rs/api/python/stable/reference/api/polars.from_dicts.html
     df = polars.from_dicts(flatdata, schema=fieldnames)
-    logger.debug("Dataframe: %s", df)
-    logger.debug("All header fields: %s", fieldnames)
+    # logger.debug("Dataframe: %s", df)
+    # logger.debug("All header fields: %s", fieldnames)
     return df

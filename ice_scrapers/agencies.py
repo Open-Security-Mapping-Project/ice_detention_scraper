@@ -11,19 +11,18 @@ from schemas import (
 import time
 from utils import (
     logger,
-    session,
+    output_folder,
+    req_get,
 )
 from .utils import download_file
 
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 base_xlsx_url = "https://www.ice.gov/identify-and-arrest/287g"
 
 
 def scrape_agencies(keep_sheet: bool = True, force_download: bool = True) -> dict:
     """Collect data on participating agencies"""
     start_time = time.time()
-    resp = session.get(base_xlsx_url, timeout=120)
-    resp.raise_for_status()
+    resp = req_get(base_xlsx_url, timeout=120)
     soup = BeautifulSoup(resp.content, "html.parser")
     links = [link["href"] for link in soup.findAll("a", href=re.compile("^https://www.ice.gov/doclib.*xlsx"))]
     if not links:
@@ -45,7 +44,7 @@ def scrape_agencies(keep_sheet: bool = True, force_download: bool = True) -> dic
         """
         # remove the date so we can easily overwrite the local (cached) file
         filename = date_re.sub("", link.split("/")[-1])
-        path = f"{SCRIPT_DIR}{os.sep}{filename}"
+        path = f"{output_folder}{os.sep}{filename}"
         if force_download or not os.path.exists(path):
             logger.info("Downloading agency info sheet from %s", link)
             download_file(link, path)

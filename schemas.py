@@ -52,6 +52,7 @@ facility_schema: dict = {
         "last_date": None,
         "last_rating": "",
         "last_type": "",
+        "details": [],
     },
     "image_url": "",
     "osm": {

@@ -18,9 +18,7 @@ def export_to_file(
     if not facilities_data or not facilities_data.get("facilities", []):
         logger.warning("No data to export!")
         return ""
-    # make sure the folder we're dropping files into exists
-    os.makedirs(output_folder, exist_ok=True)
-    full_name = f"{output_folder}/{filename}.{file_type}"
+    full_name = f"{output_folder}{os.sep}{filename}.{file_type}"
     if file_type in ["csv", "xlsx", "parquet"]:
         writer = convert_to_dataframe(facilities_data["facilities"])
         match file_type:

@@ -7,7 +7,7 @@ import time
 from utils import (
     default_timestamp,
     logger,
-    session,
+    req_get,
     timestamp_format,
 )
 from .utils import (
@@ -95,8 +95,7 @@ def _scrape_updated(url: str) -> datetime.datetime:
         return datetime.datetime.strptime(default_timestamp, timestamp_format)
     logger.debug("  Fetching: %s", url)
     try:
-        response = session.get(url, timeout=30)
-        response.raise_for_status()
+        response = req_get(url, timeout=30, wait_time=0.1)
     except Exception as e:
         logger.error("  Error parsing %s: %s", url, e)
         return datetime.datetime.strptime(default_timestamp, timestamp_format)
@@ -118,8 +117,7 @@ def _scrape_page(page_url: str) -> list:
     """Scrape a single page of facilities using BeautifulSoup"""
     logger.debug("  Fetching: %s", page_url)
     try:
-        response = session.get(page_url, timeout=30)
-        response.raise_for_status()
+        response = req_get(page_url, timeout=30, wait_time=0.1)
     except Exception as e:
         logger.error("  Error parsing %s: %s", page_url, e)
         return []

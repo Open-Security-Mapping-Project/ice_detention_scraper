@@ -1,5 +1,5 @@
 from enrichers import Enrichment
-from utils import logger
+from utils import logger, req_get
 
 
 class OpenStreetMap(Enrichment):
@@ -40,13 +40,13 @@ class OpenStreetMap(Enrichment):
                     "dedupe": 1,
                 },
                 "street_address": {
-                    "q": f"{full_address}",
+                    "q": full_address,
                     "format": "json",
                     "limit": 5,
                     "dedupe": 1,
                 },
                 "locality": {
-                    "q": f"{locality}",
+                    "q": locality,
                     "format": "json",
                     "limit": 5,
                     "dedupe": 1,
@@ -56,7 +56,7 @@ class OpenStreetMap(Enrichment):
             logger.debug("Searching OSM for %s", params["q"])
             self.resp_info["search_query_steps"].append(params["q"])  # type: ignore [attr-defined]
             try:
-                response = self._req(search_url, params=params, timeout=15)
+                response = req_get(search_url, params=params, timeout=15)
                 data.extend(response.json())
             except Exception as e:
                 logger.debug(" OSM search error for '%s': %s", facility_name, e)
@@ -73,10 +73,8 @@ class OpenStreetMap(Enrichment):
         lon = first_result.get("lon", self.default_coords["longitude"])
         osm_type = first_result.get("osm_type", "")
         osm_id = first_result.get("osm_id", "")
-        self.resp_info["details"]["latitude"] = lat  # type: ignore [index]
-        self.resp_info["details"]["longitude"] = lon  # type: ignore [index]
         self.resp_info["title"] = first_result.get("display_name", "")
-        self.resp_info["details"]["class"] = first_result.get("class", "")  # type: ignore [index]
+        self.resp_info["details"] = {"latitude": lat, "logitude": lon, "class": first_result.get("class", "")}
         if osm_type == "way":
             self.resp_info["url"] = f"https://www.openstreetmap.org/way/{osm_id}"
         else:

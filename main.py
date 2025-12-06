@@ -27,7 +27,6 @@ from ice_scrapers import facilities_scrape_wrapper
 from enrichers import enrich_facility_data
 from schemas import supported_output_types
 from utils import logger
-# CLI, argument parsing, script orchestration
 
 
 def main() -> None:

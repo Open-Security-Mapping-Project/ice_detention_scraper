@@ -5,21 +5,13 @@ may call them
 """
 
 import copy
-import requests
 from schemas import enrich_resp_schema
-import time
-from utils import (
-    default_headers,
-    session,
-)
 
 
 class Enrichment(object):
     _required_keys = [
         "facility_name",
     ]
-    # in seconds
-    _wait_time: float = 1
 
     def __init__(self, **kwargs):
         self.resp_info = copy.deepcopy(enrich_resp_schema)
@@ -31,28 +23,6 @@ class Enrichment(object):
     def search(self) -> dict:
         """Child objects should implement this"""
         return {}
-
-    def _req(self, url: str, **kwargs) -> requests.Response:
-        """requests response wrapper to ensure we honor waits"""
-        headers = kwargs.get("headers", {})
-        # ensure we get all headers configured correctly
-        # but manually applied headers win the argument
-        for k, v in default_headers.items():
-            if k in headers.keys():
-                continue
-            headers[k] = v
-
-        response = session.get(
-            url,
-            allow_redirects=True,
-            timeout=kwargs.get("timeout", 10),
-            params=kwargs.get("params", {}),
-            stream=kwargs.get("stream", False),
-            headers=headers,
-        )
-        response.raise_for_status()
-        time.sleep(self._wait_time)
-        return response
 
     def _minimal_clean_facility_name(self, name: str) -> str:
         """Minimal cleaning that preserves important context like 'County Jail'"""

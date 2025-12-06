@@ -8,9 +8,11 @@ dependencies = [
     "beautifulsoup4>=4.13.5",
     "fastexcel>=0.15.1",
     "lxml>=6.0.1",
+    "pdfplumber>=0.11.8",
     "polars>=1.33.0",
     "pyarrow>=21.0.0",
     "requests>=2.32.5",
+    "thefuzz>=0.22.1",
     "xlsxwriter>=3.2.5",
 ]
 

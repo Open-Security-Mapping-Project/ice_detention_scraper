@@ -1,6 +1,6 @@
 from enrichers import Enrichment
 from urllib.parse import quote
-from utils import logger
+from utils import logger, req_get
 
 
 class Wikipedia(Enrichment):
@@ -32,7 +32,7 @@ class Wikipedia(Enrichment):
         self.resp_info["search_query_steps"].append(wiki_url)  # type: ignore [attr-defined]
         initial_response = False
         try:
-            response = self._req(wiki_url)
+            response = req_get(wiki_url, wait_time=self._wait_time)
             initial_response = True
         except Exception as e:
             logger.debug("  Wikipedia search error for '%s': %s", wiki_url, e)
@@ -40,7 +40,7 @@ class Wikipedia(Enrichment):
             wiki_url = f"{self.static_search}{quote(facility_name.replace(' ', '_').replace('|', '_'))}"
             self.resp_info["search_query_steps"].append(wiki_url)  # type: ignore [attr-defined]
             try:
-                response = self._req(wiki_url)
+                response = req_get(wiki_url, wait_time=self._wait_time)
                 initial_response = True
             except Exception as e:
                 logger.debug("  Wikipedia search error for '%s': %s", wiki_url, e)
@@ -101,7 +101,7 @@ class Wikipedia(Enrichment):
             }
 
             try:
-                response = self._req(self.api_search, params=params)
+                response = req_get(self.api_search, params=params, wait_time=self._wait_time)
                 data = response.json()
             except Exception as e:
                 logger.debug("   Wikipedia search for %s failed: %s", self.api_search, e)
@@ -161,7 +161,7 @@ class Wikipedia(Enrichment):
 
                         # Verify the page exists and isn't a redirect to something unrelated
                         try:
-                            verify_response = self._req(final_url)
+                            verify_response = req_get(final_url, wait_time=self._wait_time)
                         except Exception as e:
                             logger.debug("    Wikipedia query for %s failed: %s", final_url, e)
                             self.resp_info["search_query_steps"].append(final_url)  # type: ignore [attr-defined]
