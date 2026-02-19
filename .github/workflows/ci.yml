@@ -15,18 +15,18 @@ jobs:
         run: |
           curl -SsL https://mise.run | bash > /dev/null
           ~/.local/bin/mise trust --quiet .config/mise.toml
-          ~/.local/bin/mise install --quiet python
+          ~/.local/bin/mise install --quiet ruff python
           eval "$(~/.local/bin/mise activate bash)" > /dev/null
           pip install -q --no-cache-dir --upgrade pip wheel uv
           uv sync
       - name: Ruff Format
         run: |
           eval "$(~/.local/bin/mise activate bash)" > /dev/null
-          uv run ruff format --check
+          ruff format --check
       - name: Ruff Check
         run: |
           eval "$(~/.local/bin/mise activate bash)" > /dev/null
-          uv run ruff check
+          ruff check
       - name: run mypy
         run: |
           eval "$(~/.local/bin/mise activate bash)" > /dev/null

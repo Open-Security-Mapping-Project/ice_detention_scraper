@@ -27,13 +27,13 @@ pre-commit:
         - ".github/workflows/*.y*ml"
 
     - name: Ruff Formatting
-      run: uv run ruff format -q .
+      run: ruff format -q .
       glob:
         - "*.py"
       stage_fixed: true
 
     - name: Ruff Syntax checking
-      run: uv run ruff check --fix -q
+      run: ruff check --fix -q
       glob:
         - "*.py"
       stage_fixed: true

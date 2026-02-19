@@ -1,7 +1,6 @@
 import copy
 import json
 import os
-import polars as pl
 from schemas import enrichment_print_schema
 from utils import (
     convert_to_dataframe,
@@ -9,22 +8,6 @@ from utils import (
     output_folder,
 )
 import xlsxwriter  # type: ignore [import-untyped]
-
-
-# Deals with list columns data that CSV cannot deal with.
-def _stringify_list_columns(df: pl.DataFrame) -> pl.DataFrame:
-    """Convert any List-type columns to JSON strings so CSV/Excel can handle them."""
-    list_cols = [col for col, dtype in zip(df.columns, df.dtypes) if dtype.base_type() == pl.List]
-    if list_cols:
-        df = df.with_columns(
-            [
-                pl.col(c)
-                .map_elements(lambda val: json.dumps(val.to_list(), default=str), return_dtype=pl.String)
-                .alias(c)
-                for c in list_cols
-            ]
-        )
-    return df
 
 
 def export_to_file(
@@ -40,13 +23,12 @@ def export_to_file(
         writer = convert_to_dataframe(facilities_data["facilities"])
         match file_type:
             case "xlsx":
+                # Excel doesn't support timezones properly, so...
                 with xlsxwriter.Workbook(full_name, {"remove_timezone": True}) as wb:
-                    _ = _stringify_list_columns(writer).write_excel(workbook=wb, include_header=True, autofit=True)
-                    # _ = writer.write_excel(workbook=wb, include_header=True, autofit=True)
+                    _ = writer.write_excel(workbook=wb, include_header=True, autofit=True)
             case "csv":
                 with open(full_name, "w", newline="", encoding="utf-8") as f_out:
-                    # writer.write_csv(file=f_out, include_header=True)
-                    _stringify_list_columns(writer).write_csv(file=f_out, include_header=True)
+                    _ = writer.write_csv(file=f_out, include_header=True)
             case "parquet":
                 writer.write_parquet(full_name, use_pyarrow=True)
             case _:

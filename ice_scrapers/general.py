@@ -33,9 +33,14 @@ def facilities_scrape_wrapper(
         logger.debug("  Matching %s for inspection details...", facility)
         # exact match (extremely unlikely)
         if facility.lower() in facility_name_map:
+            """
+            flip the order so the newest inspection is likely first in the list
+            because trying to convert these wildly inconsistent dates to sortable
+            objects is probably a fool's errand, so we'll just hope for the best...
+            """
             facilities_data["facilities"][facility_name_map[facility.lower()]]["inspection"]["details"] = copy.deepcopy(
                 inspect
-            )
+            ).reverse()
             break
         # logger.debug("    Checking fuzzy matches:")
         for k, v in facility_name_map.items():

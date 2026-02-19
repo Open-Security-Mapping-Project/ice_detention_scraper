@@ -14,6 +14,12 @@ field_offices_schema: dict = {
     "scraped_date": datetime.datetime.now(datetime.UTC),
 }
 
+inspection_schema: dict = {
+    "date": "",
+    "url": "",
+    "text": "",
+}
+
 field_office_schema: dict = {
     "address": {
         "administrative_area": "",

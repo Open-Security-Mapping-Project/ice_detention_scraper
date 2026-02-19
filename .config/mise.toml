@@ -1,10 +1,12 @@
 [tools]
-python = "3.14.1"
+# languages
 node = "latest"
-lefthook = "latest"
-yamllint = "latest"
+python = "3.14.1"
+# linters and tooling
 actionlint = "latest"
-shellcheck = "latest"
-markdownlint-cli2 = "latest"
 jq = "latest"
-uv = "latest"
+lefthook = "latest"
+markdownlint-cli2 = "latest"
+ruff = "latest"
+shellcheck = "latest"
+yamllint = "latest"

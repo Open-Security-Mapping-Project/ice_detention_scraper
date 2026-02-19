@@ -1,15 +1,18 @@
 from bs4 import BeautifulSoup
-import zstandard as zstd
+import copy
 import os
 import pdfplumber
 from pprint import pformat
 import re
+from schemas import inspection_schema
 import sys
 from utils import (
     logger,
     output_folder,
     req_get,
 )
+import zstandard as zstd
+
 from .utils import download_file
 
 root_url = "https://www.ice.gov/foia/odo-facility-inspections"
@@ -45,7 +48,7 @@ def find_inspections(keep_text: bool = True) -> dict:
     links = content.select("a")  # type: ignore [union-attr]
     for link in links:
         url = link["href"]
-        obj = {"date": "", "url": url, "text": ""}
+        obj = copy.deepcopy(inspection_schema)
         matches = text_re.search(link.text.strip())
         if len(matches.groups()) < 5:  # type: ignore [union-attr]
             logger.warning("  Did not find all expected groups in %s. Skipping...", link.text.strip())
@@ -69,6 +72,5 @@ def find_inspections(keep_text: bool = True) -> dict:
             inspections[location].append(obj)
         else:
             inspections[location] = [obj]
-
     logger.debug(pformat(inspections))
     return inspections

@@ -56,6 +56,7 @@ def main() -> None:
         "--file-type",
         choices=supported_output_types,
         type=str,
+        default="csv",
         help="type of file to export",
     )
     _ = parser.add_argument(

@@ -56,7 +56,6 @@ facility_sheet_header = [
     "Guaranteed Minimum",
     "Last Inspection Type",
     "Last Inspection End Date",
-    # "Pending YEAR Inspection",
     "Last Inspection Standard",
     "Last Final Rating",
 ]
@@ -125,6 +124,9 @@ def load_sheet(keep_sheet: bool = True, force_download: bool = True) -> dict:
         # skip all rows that don't manage to populate all required headers
         if not all(row[k] is not None for k in required_cols):
             logger.debug("Skipping bad row in spreadsheet: %s", row)
+            continue
+        if row["Name"] == "Name":
+            logger.debug("Skipping bad header row: %s", row)
             continue
         # logger.debug("processing %s", row)
         details = copy.deepcopy(facility_schema)
